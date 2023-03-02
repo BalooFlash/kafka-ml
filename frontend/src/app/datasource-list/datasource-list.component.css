@@ -1,0 +1,10 @@
+
+.mat-column-view   {
+  flex: 0 0 70px !important;
+  white-space: unset !important;
+}
+
+.mat-column-deploy  {
+  flex: 0 0 60px !important;
+  white-space: unset !important;
+}

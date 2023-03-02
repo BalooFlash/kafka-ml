@@ -1,0 +1,104 @@
+<div class="container">
+    <div class="header">
+      <h1>Training results <a *ngIf="deploymentID!=null"> of Deployment {{deploymentID}}</a></h1>
+      <span class="spacer"></span>
+    </div>
+
+    <div class="table-container mat-elevation-z2">
+      <div class="table-header">
+        <mat-form-field>
+          <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+        </mat-form-field>
+      </div>
+      <mat-table [dataSource]="dataSource">
+        
+        <ng-container matColumnDef="id">
+          <mat-header-cell *matHeaderCellDef> ID </mat-header-cell>
+          <mat-cell *matCellDef="let element" title="{{ element.id}}"> {{ element.id}} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="model">
+          <mat-header-cell *matHeaderCellDef> Model </mat-header-cell>
+          <mat-cell *matCellDef="let element" title="{{ element.model.name}}"> {{ element.model.name}} </mat-cell>
+        </ng-container>
+    
+        <ng-container matColumnDef="train_metrics">
+          <mat-header-cell *matHeaderCellDef> Training metrics </mat-header-cell>
+          <mat-cell *matCellDef="let element" title="{{getLastMetric(element.train_metrics)}}"><div [innerHTML]="metricsToHTML(getLastMetric(element.train_metrics))"></div></mat-cell>
+        </ng-container>
+        
+        <ng-container matColumnDef="val_metrics">
+          <mat-header-cell *matHeaderCellDef> Validation metrics </mat-header-cell>
+          <mat-cell *matCellDef="let element" title="{{getLastMetric(element.val_metrics)}}"><div [innerHTML]="metricsToHTML(getLastMetric(element.val_metrics))"></div></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="test_metrics">
+          <mat-header-cell *matHeaderCellDef> Test metrics </mat-header-cell>
+          <mat-cell *matCellDef="let element" title="{{getLastMetric(element.test_metrics)}}"><div [innerHTML]="metricsToHTML(getLastMetric(element.test_metrics))"></div></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="training_time">
+          <mat-header-cell *matHeaderCellDef> Training Time </mat-header-cell>
+          <mat-cell *matCellDef="let element" title="{{ element.training_time}}"> {{ element.training_time}} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <mat-header-cell *matHeaderCellDef> Status</mat-header-cell>
+          <mat-cell *matCellDef="let element" title="{{element.status}}"> 
+          <mat-icon class="created"  *ngIf="element.status=='created'" >create</mat-icon>
+          <mat-icon class="deployed"  *ngIf="element.status=='deployed'" >input</mat-icon>
+          <mat-icon class="stopped" *ngIf="element.status=='stopped'" >stop</mat-icon>
+          <mat-icon class="finished" *ngIf="element.status=='finished'" >done</mat-icon>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="status_changed">
+          <mat-header-cell *matHeaderCellDef> Last status change</mat-header-cell>
+          <mat-cell *matCellDef="let element" title="{{element.status_changed}}"> {{element.status_changed}}  </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="chart">
+          <mat-header-cell *matHeaderCellDef > Chart </mat-header-cell>
+          <mat-cell *matCellDef="let element">            
+            <button mat-icon-button title="Show metrics chart" routerLink="/results/chart/{{element.id}}/">
+              <mat-icon color="primary">show_chart</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="inference">
+          <mat-header-cell *matHeaderCellDef > Inference </mat-header-cell>
+          <mat-cell *matCellDef="let element">            
+            <button mat-icon-button *ngIf="element.status=='finished'"  title="Deploy it for Inference" routerLink="/results/inference/{{element.id}}/">
+              <mat-icon color="primary">play_arrow</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+        
+        <ng-container matColumnDef="download">
+          <mat-header-cell *matHeaderCellDef > Download </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+           <button mat-icon-button *ngIf="element.status=='finished'" title="Download trained model" (click)="getTrainedModel(element.id)">
+              <mat-icon color="primary">archive</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="manage">
+          <mat-header-cell *matHeaderCellDef> Manage </mat-header-cell>
+          <mat-cell *matCellDef="let element">            
+            <button *ngIf="element.status!='deployed'" mat-icon-button title="Remove training" (click)="confirmDeletion(element.id)">
+              <mat-icon color="primary">delete</mat-icon>
+            </button>
+            <button *ngIf="element.status=='deployed'" mat-icon-button title="Stop training" (click)="confirmStopping(element.id)">
+              <mat-icon color="primary">stop</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+    
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+
+    </div>
+</div>
